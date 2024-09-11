@@ -1,6 +1,17 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, Text, TouchableOpacity, Alert, Modal, Image, ImageBackground, FlatList } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  Text,
+  TouchableOpacity,
+  Alert,
+  Modal,
+  Image,
+  ImageBackground,
+  FlatList,
+} from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 interface Todo {
   id: string;
@@ -13,8 +24,9 @@ interface Todo {
 
 export default function HomeScreen() {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [input, setInput] = useState<string>('');
+  const [input, setInput] = useState<string>("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isSortModalVisible, setSortModalVisible] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
@@ -22,28 +34,34 @@ export default function HomeScreen() {
 
   const addTodo = () => {
     if (input.trim().length === 0) {
-      Alert.alert('Input Error', 'Please enter a to-do item');
+      Alert.alert("Input Error", "Please enter a to-do item");
       return;
     }
 
     if (editingId) {
-      setTodos(todos.map(todo =>
-        todo.id === editingId ? { ...todo, text: input } : todo
-      ));
+      setTodos(
+        todos.map((todo) =>
+          todo.id === editingId ? { ...todo, text: input } : todo
+        )
+      );
       setEditingId(null);
     } else {
-      const newTodo: Todo = { id: Date.now().toString(), text: input, done: false };
+      const newTodo: Todo = {
+        id: Date.now().toString(),
+        text: input,
+        done: false,
+      };
       setTodos([...todos, newTodo]);
     }
-    setInput('');
+    setInput("");
   };
 
   const deleteTodo = (id: string) => {
-    setTodos(todos.filter(todo => todo.id !== id));
+    setTodos(todos.filter((todo) => todo.id !== id));
   };
 
   const editTodo = (id: string) => {
-    const todoToEdit = todos.find(todo => todo.id === id);
+    const todoToEdit = todos.find((todo) => todo.id === id);
     if (todoToEdit) {
       setInput(todoToEdit.text);
       setEditingId(id);
@@ -51,13 +69,15 @@ export default function HomeScreen() {
   };
 
   const markAsDone = (id: string) => {
-    setTodos(todos.map(todo =>
-      todo.id === id ? { ...todo, done: !todo.done } : todo
-    ));
+    setTodos(
+      todos.map((todo) =>
+        todo.id === id ? { ...todo, done: !todo.done } : todo
+      )
+    );
   };
 
   const openModal = (id: string) => {
-    const todoToView = todos.find(todo => todo.id === id);
+    const todoToView = todos.find((todo) => todo.id === id);
     if (todoToView) {
       setSelectedTodo(todoToView);
       setIsModalVisible(true);
@@ -66,9 +86,18 @@ export default function HomeScreen() {
 
   const saveDetails = () => {
     if (selectedTodo) {
-      setTodos(todos.map(todo =>
-        todo.id === selectedTodo.id ? { ...todo, description: selectedTodo.description, time: selectedTodo.time, date: selectedTodo.date } : todo
-      ));
+      setTodos(
+        todos.map((todo) =>
+          todo.id === selectedTodo.id
+            ? {
+                ...todo,
+                description: selectedTodo.description,
+                time: selectedTodo.time,
+                date: selectedTodo.date,
+              }
+            : todo
+        )
+      );
       setIsModalVisible(false);
       setSelectedTodo(null);
     }
@@ -81,7 +110,7 @@ export default function HomeScreen() {
       if (selectedTodo) {
         setSelectedTodo({
           ...selectedTodo,
-          date: formattedDate
+          date: formattedDate,
         });
       }
     }
@@ -92,15 +121,40 @@ export default function HomeScreen() {
     if (selectedTime) {
       const hours = selectedTime.getHours();
       const minutes = selectedTime.getMinutes();
-      const period = hours >= 12 ? 'PM' : 'AM';
-      const formattedTime = `${hours % 12 || 12}:${minutes.toString().padStart(2, '0')} ${period}`;
+      const period = hours >= 12 ? "PM" : "AM";
+      const formattedTime = `${hours % 12 || 12}:${minutes
+        .toString()
+        .padStart(2, "0")} ${period}`;
       if (selectedTodo) {
         setSelectedTodo({
           ...selectedTodo,
-          time: formattedTime
+          time: formattedTime,
         });
       }
     }
+  };
+
+  const sortTodos = (criterion: string) => {
+    let sortedTodos: Todo[] = [];
+
+    switch (criterion) {
+      case "name":
+        sortedTodos = [...todos].sort((a, b) => a.text.localeCompare(b.text));
+        break;
+      case "date":
+        sortedTodos = [...todos].sort((a, b) =>
+          (a.date || "").localeCompare(b.date || "")
+        );
+        break;
+      case "done":
+        sortedTodos = [...todos].sort(
+          (a, b) => Number(a.done) - Number(b.done)
+        );
+        break;
+    }
+
+    setTodos(sortedTodos);
+    setSortModalVisible(false);
   };
 
   const renderItem = ({ item }: { item: Todo }) => (
@@ -112,32 +166,46 @@ export default function HomeScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
       <View style={styles.buttonsContainer}>
-        <TouchableOpacity onPress={() => openModal(item.id)}>
-          <Image
-            source={require("../../assets/images/view.png")} // Adjust the path if necessary
-            style={styles.viewButton}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => editTodo(item.id)}>
-          <Image
-            source={require("../../assets/images/edit.png")} // Adjust the path if necessary
-            style={styles.editButton}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => deleteTodo(item.id)}>
-          <Image
-            source={require("../../assets/images/delete.png")} // Adjust the path if necessary
-            style={styles.deleteButton}
-          />
-        </TouchableOpacity>
+        {item.done ? (
+          // When task is done, "done" button will act like the delete button
+          <TouchableOpacity onPress={() => deleteTodo(item.id)}>
+            <Image
+              source={require("../../assets/images/done.png")} // Adjust the path if necessary
+              style={styles.doneButton}
+            />
+          </TouchableOpacity>
+        ) : (
+          // Show view, edit, and delete buttons if the task is not done
+          <>
+            <TouchableOpacity onPress={() => openModal(item.id)}>
+              <Image
+                source={require("../../assets/images/view.png")}
+                style={styles.viewButton}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => editTodo(item.id)}>
+              <Image
+                source={require("../../assets/images/edit.png")}
+                style={styles.editButton}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => deleteTodo(item.id)}>
+              <Image
+                source={require("../../assets/images/delete.png")}
+                style={styles.deleteButton}
+              />
+            </TouchableOpacity>
+          </>
+        )}
       </View>
     </View>
   );
 
   return (
     <ImageBackground
-      source={require('../../assets/images/background.jpg')} // Adjust the path if necessary
+      source={require("../../assets/images/background.jpg")} // Adjust the path if necessary
       style={styles.container}
     >
       <View style={styles.header}>
@@ -146,17 +214,36 @@ export default function HomeScreen() {
           style={styles.taskLogo}
         />
         <Text style={styles.title}> To Do List</Text>
+        <TouchableOpacity
+          style={styles.sortButton}
+          onPress={() => setSortModalVisible(true)}
+        >
+          <Image
+            source={require("../../assets/images/sort.png")} // Adjust the path if necessary
+            style={styles.taskLogo}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteAllDoneButton}
+          onPress={() => {
+            // Function to delete all done todos
+            setTodos(todos.filter((todo) => !todo.done));
+          }}
+        >
+          <Image
+            source={require("../../assets/images/deleteAllDone.png")} // Adjust the path if necessary
+            style={styles.taskLogo}
+          />
+        </TouchableOpacity>
       </View>
       <TextInput
         style={styles.input}
         placeholder="Enter a task"
         value={input}
+        multiline={true}
         onChangeText={setInput}
       />
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={addTodo}
-      >
+      <TouchableOpacity style={styles.addButton} onPress={addTodo}>
         <Text style={styles.addButtonText}>
           {editingId ? "Update Task" : "Add Task"}
         </Text>
@@ -167,6 +254,49 @@ export default function HomeScreen() {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
       />
+
+      {isSortModalVisible && (
+        <Modal
+          visible={isSortModalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setSortModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Sort</Text>
+
+              <TouchableOpacity
+                style={styles.sortOptionButton}
+                onPress={() => sortTodos("name")}
+              >
+                <Text style={styles.sortOptionText}>by Name</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.sortOptionButton}
+                onPress={() => sortTodos("date")}
+              >
+                <Text style={styles.sortOptionText}>by Date</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.sortOptionButton}
+                onPress={() => sortTodos("done")}
+              >
+                <Text style={styles.sortOptionText}>by Status</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.sortModalCloseButton} // Use new style here
+                onPress={() => setSortModalVisible(false)}
+              >
+                <Text style={styles.sortModalCloseButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
 
       {selectedTodo && (
         <Modal
@@ -182,35 +312,56 @@ export default function HomeScreen() {
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>{selectedTodo.text}</Text>
               <TextInput
-                style={styles.input}
+                style={styles.descriptionInput}
                 placeholder="Description"
-                value={selectedTodo.description || ''}
-                onChangeText={text => setSelectedTodo({ ...selectedTodo, description: text })}
+                value={selectedTodo.description || ""}
+                multiline={true}
+                onChangeText={(text) =>
+                  setSelectedTodo({ ...selectedTodo, description: text })
+                }
               />
               <TouchableOpacity
                 style={styles.dateTimeButton}
                 onPress={() => setShowDatePicker(true)}
               >
-                <Text style={styles.dateTimeText}>{selectedTodo.date || 'Select Date'}</Text>
+                <Text
+                  style={
+                    selectedTodo?.date
+                      ? styles.dateTimeTextSelected
+                      : styles.dateTimeText
+                  }
+                >
+                  {selectedTodo?.date || "Select Date"}
+                </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.dateTimeButton}
                 onPress={() => setShowTimePicker(true)}
               >
-                <Text style={styles.dateTimeText}>{selectedTodo.time || 'Select Time'}</Text>
-              </TouchableOpacity>
-              <View style={styles.modalButtonContainer}>
-                <TouchableOpacity
-                  style={styles.saveButton}
-                  onPress={saveDetails}
+                <Text
+                  style={
+                    selectedTodo?.time
+                      ? styles.dateTimeTextSelected
+                      : styles.dateTimeText
+                  }
                 >
-                  <Text style={styles.saveButtonText}>Save</Text>
-                </TouchableOpacity>
+                  {selectedTodo?.time || "Select Time"}
+                </Text>
+              </TouchableOpacity>
+
+              <View style={styles.modalButtonContainer}>
                 <TouchableOpacity
                   style={styles.closeButton}
                   onPress={() => setIsModalVisible(false)}
                 >
                   <Text style={styles.closeButtonText}>Close</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={saveDetails}
+                >
+                  <Text style={styles.saveButtonText}>Save</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -244,26 +395,27 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 50,
     paddingHorizontal: 20,
-    backgroundColor: '#F4F4F8', // Softer background color
+    backgroundColor: "#F4F4F8", // Softer background color
+    paddingBottom: 50,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
+    justifyContent: "space-between", // Distribute space between items
     marginBottom: 30,
   },
   addButton: {
-    backgroundColor: '#1E2A5E',
+    backgroundColor: "#1E2A5E",
     padding: 15,
     borderRadius: 10, // Softer edges
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 10, // Optional margin to separate from the input
   },
   addButtonText: {
-    color: '#FFF',
+    color: "#FFF",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   taskLogo: {
     width: 24,
@@ -277,27 +429,28 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#E0E0E0',
-    backgroundColor: '#FFF',
+    borderColor: "#E0E0E0",
+    backgroundColor: "#FFF",
     padding: 15,
-    marginBottom: 5,
+    marginBottom: 10,
     borderRadius: 10,
     fontSize: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 3,
+    textAlignVertical: "center",
   },
   todoItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 15,
-    backgroundColor: '#FFF',
+    backgroundColor: "#FFF",
     borderRadius: 10,
     marginTop: 5,
     marginBottom: 5,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
@@ -309,45 +462,49 @@ const styles = StyleSheet.create({
   },
   todoText: {
     fontSize: 18,
-    color: '#333',
+    color: "#333",
   },
   todoTextDone: {
-    textDecorationLine: 'line-through',
-    color: '#A9A9A9',
+    textDecorationLine: "line-through",
+    color: "#A9A9A9",
   },
   buttonsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  editButton: {
-    marginRight: 10,
-    width: 24,
-    height: 24,
-    tintColor: '#007BFF',
-  },
-  deleteButton: {
-    width: 24,
-    height: 24,
-    tintColor: '#FF3B30',
+    flexDirection: "row",
+    alignItems: "center",
   },
   viewButton: {
     marginRight: 10,
     width: 24,
     height: 24,
-    tintColor: '#4CD964',
+    tintColor: "#4CD964",
+  },
+  editButton: {
+    marginRight: 10,
+    width: 24,
+    height: 24,
+    tintColor: "#007BFF",
+  },
+  deleteButton: {
+    width: 24,
+    height: 24,
+    tintColor: "#FF3B30",
+  },
+  doneButton: {
+    width: 24,
+    height: 24,
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalContent: {
-    width: '90%',
+    width: "90%",
     padding: 20,
-    backgroundColor: '#FFF',
+    backgroundColor: "#FFF",
     borderRadius: 15,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
@@ -355,51 +512,105 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 15,
   },
-  modalButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 15,
-  },
-  saveButton: {
-    backgroundColor: '#1E2A5E',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    flex: 1,
-    marginRight: 10, // Added marginRight to create space between the buttons
-  },
-  saveButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  closeButton: {
-    backgroundColor: '#A02334', // Red background color
-    padding: 15, // Reduced padding to match the save button
-    borderRadius: 10,
-    alignItems: 'center',
-    flex: 1,
-  },
-  closeButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  dateTimeButton: {
+  descriptionInput: {
     borderWidth: 1,
-    borderColor: '#E0E0E0',
-    backgroundColor: '#F9F9F9',
-    padding: 10,
-    borderRadius: 10,
-    alignItems: 'center',
+    borderColor: "#E0E0E0",
+    backgroundColor: "#FFF",
+    padding: 15,
     marginBottom: 15,
+    borderRadius: 10,
+    fontSize: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
   dateTimeText: {
     fontSize: 16,
-    color: '#333',
+    color: "#333", // Default color when no date or time is selected
+  },
+  dateTimeTextSelected: {
+    fontSize: 16,
+    color: "#0BBB7E", // Green color when date or time is selected
+  },
+  modalButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 15,
+  },
+  saveButton: {
+    backgroundColor: "#1E2A5E",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    flex: 1,
+  },
+  saveButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  closeButton: {
+    backgroundColor: "#A02334", // Red background color
+    padding: 15, // Reduced padding to match the save button
+    borderRadius: 10,
+    alignItems: "center",
+    flex: 1,
+    marginRight: 10, // Added marginRight to create space between the buttons
+  },
+  closeButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  dateTimeButton: {
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    backgroundColor: "#F9F9F9",
+    padding: 10,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  sortButton: {
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: "auto", // Push the sort button to the right
+  },
+  sortOptionButton: {
+    backgroundColor: "#f0f0f0",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+    alignItems: "center",
+  },
+  sortOptionText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  sortModalCloseButton: {
+    backgroundColor: "#A02334", // Red background color
+    padding: 15, // Adjusted padding for the sort modal close button
+    borderRadius: 10, // Slightly smaller radius
+    alignItems: "center",
+    justifyContent: "center", // Center text inside button
+  },
+  sortModalCloseButtonText: {
+    color: "#FFF",
+    fontSize: 14, // Smaller font size for the sort modal close button
+    fontWeight: "bold",
+  },
+  deleteAllDoneButton: {
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
