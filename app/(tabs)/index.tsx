@@ -142,15 +142,15 @@ export default function HomeScreen() {
           source={require("@/assets/images/bars.png")}
           style={styles.taskLogo}
         />
-        <Text style={styles.title}> To Do Lists</Text>
+        <Text style={styles.title}> To Do List</Text>
       </View>
       <TextInput
         style={styles.input}
-        placeholder="Enter a to-do"
+        placeholder="Enter a task"
         value={input}
         onChangeText={setInput}
       />
-      <Button title={editingId ? "Update To-Do" : "Add To-Do"} onPress={addTodo} />
+      <Button title={editingId ? "Update Task" : "Add Task"} onPress={addTodo} />
       <FlatList
         data={todos}
         renderItem={renderItem}
@@ -169,11 +169,7 @@ export default function HomeScreen() {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <TextInput
-                style={styles.input}
-                value={selectedTodo.text}
-                editable={false}
-              />
+              <Text style={styles.modalTitle}>{selectedTodo.text}</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Description"
@@ -181,19 +177,31 @@ export default function HomeScreen() {
                 onChangeText={text => setSelectedTodo({...selectedTodo, description: text})}
               />
               <TouchableOpacity
-                style={styles.input}
+                style={styles.dateTimeButton}
                 onPress={() => setShowDatePicker(true)}
               >
-                <Text>{selectedTodo.date || 'Select Date'}</Text>
+                <Text style={styles.dateTimeText}>{selectedTodo.date || 'Select Date'}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.input}
+                style={styles.dateTimeButton}
                 onPress={() => setShowTimePicker(true)}
               >
-                <Text>{selectedTodo.time || 'Select Time'}</Text>
+                <Text style={styles.dateTimeText}>{selectedTodo.time || 'Select Time'}</Text>
               </TouchableOpacity>
-              <Button title="Save" onPress={saveDetails} />
-              <Button title="Close" onPress={() => setIsModalVisible(false)} />
+              <View style={styles.modalButtonContainer}>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={saveDetails}
+                >
+                  <Text style={styles.saveButtonText}>Save</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setIsModalVisible(false)}
+                >
+                  <Text style={styles.closeButtonText}>Close</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </Modal>
@@ -225,7 +233,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 50,
     paddingHorizontal: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#F4F4F8', // Softer background color
   },
   header: {
     flexDirection: "row",
@@ -234,27 +242,41 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   taskLogo: {
-    width: 16,
-    height: 16,
+    width: 24,
+    height: 24,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
-    color: "black",
+    color: "#333",
+    marginLeft: 10,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
+    borderColor: '#E0E0E0',
+    backgroundColor: '#FFF',
+    padding: 15,
+    marginBottom: 15,
+    borderRadius: 10,
+    fontSize: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
   todoItem: {
     flexDirection: 'row',
-    alignItems: 'flex-start', // Align items to the start of the cross axis
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
   todoTextContainer: {
     flex: 1,
@@ -262,11 +284,11 @@ const styles = StyleSheet.create({
   },
   todoText: {
     fontSize: 18,
-    flexWrap: 'wrap', // Allows text to wrap if needed
+    color: '#333',
   },
   todoTextDone: {
     textDecorationLine: 'line-through',
-    color: 'gray',
+    color: '#A9A9A9',
   },
   buttonsContainer: {
     flexDirection: 'row',
@@ -274,17 +296,20 @@ const styles = StyleSheet.create({
   },
   editButton: {
     marginRight: 10,
-    width: 20,
-    height: 20,
+    width: 24,
+    height: 24,
+    tintColor: '#007BFF',
   },
   deleteButton: {
-    width: 20,
-    height: 20,
+    width: 24,
+    height: 24,
+    tintColor: '#FF3B30',
   },
   viewButton: {
     marginRight: 10,
-    width: 20,
-    height: 20,
+    width: 24,
+    height: 24,
+    tintColor: '#4CD964',
   },
   modalContainer: {
     flex: 1,
@@ -293,10 +318,78 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    width: '80%',
+    width: '90%',
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF',
+    borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 15,
+  },
+  modalInput: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    backgroundColor: '#F9F9F9',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 15,
+    fontSize: 16,
+  },
+  modalText: {
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 10,
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 15,
+  },
+  saveButton: {
+    backgroundColor: '#007BFF',
+    padding: 15,
     borderRadius: 10,
     alignItems: 'center',
+    flex: 1,
+    marginRight: 10, // Added marginRight to create space between the buttons
+  },
+  saveButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  closeButton: {
+    backgroundColor: '#FF3B30', // Red background color
+    padding: 15, // Reduced padding to match the save button
+    borderRadius: 10,
+    alignItems: 'center',
+    flex: 1,
+  },
+  closeButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  dateTimeButton: {
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    backgroundColor: '#F9F9F9',
+    padding: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  dateTimeText: {
+    fontSize: 16,
+    color: '#333',
   },
 });
