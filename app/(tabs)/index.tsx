@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, Button, FlatList, Text, TouchableOpacity, Alert, Modal, Image } from 'react-native';
+import { StyleSheet, View, TextInput, Text, TouchableOpacity, Alert, Modal, Image, ImageBackground, FlatList } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 interface Todo {
@@ -115,31 +115,34 @@ export default function HomeScreen() {
       <View style={styles.buttonsContainer}>
         <TouchableOpacity onPress={() => openModal(item.id)}>
           <Image
-            source={require("@/assets/images/view.png")}
+            source={require("../../assets/images/view.png")} // Adjust the path if necessary
             style={styles.viewButton}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => editTodo(item.id)}>
           <Image
-            source={require("@/assets/images/edit.png")}
+            source={require("../../assets/images/edit.png")} // Adjust the path if necessary
             style={styles.editButton}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => deleteTodo(item.id)}>
           <Image
-            source={require("@/assets/images/delete.png")}
+            source={require("../../assets/images/delete.png")} // Adjust the path if necessary
             style={styles.deleteButton}
           />
         </TouchableOpacity>
       </View>
     </View>
-  );  
+  );
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require('../../assets/images/background.jpg')} // Adjust the path if necessary
+      style={styles.container}
+    >
       <View style={styles.header}>
         <Image
-          source={require("@/assets/images/bars.png")}
+          source={require("../../assets/images/bars.png")} // Adjust the path if necessary
           style={styles.taskLogo}
         />
         <Text style={styles.title}> To Do List</Text>
@@ -150,11 +153,19 @@ export default function HomeScreen() {
         value={input}
         onChangeText={setInput}
       />
-      <Button title={editingId ? "Update Task" : "Add Task"} onPress={addTodo} />
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={addTodo}
+      >
+        <Text style={styles.addButtonText}>
+          {editingId ? "Update Task" : "Add Task"}
+        </Text>
+      </TouchableOpacity>
+
       <FlatList
         data={todos}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
       />
 
       {selectedTodo && (
@@ -174,7 +185,7 @@ export default function HomeScreen() {
                 style={styles.input}
                 placeholder="Description"
                 value={selectedTodo.description || ''}
-                onChangeText={text => setSelectedTodo({...selectedTodo, description: text})}
+                onChangeText={text => setSelectedTodo({ ...selectedTodo, description: text })}
               />
               <TouchableOpacity
                 style={styles.dateTimeButton}
@@ -224,7 +235,7 @@ export default function HomeScreen() {
           onChange={onTimeChange}
         />
       )}
-    </View>
+    </ImageBackground>
   );
 }
 
@@ -241,6 +252,19 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     marginBottom: 30,
   },
+  addButton: {
+    backgroundColor: '#1E2A5E',
+    padding: 15,
+    borderRadius: 10, // Softer edges
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10, // Optional margin to separate from the input
+  },
+  addButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   taskLogo: {
     width: 24,
     height: 24,
@@ -256,7 +280,7 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     backgroundColor: '#FFF',
     padding: 15,
-    marginBottom: 15,
+    marginBottom: 5,
     borderRadius: 10,
     fontSize: 16,
     shadowColor: '#000',
@@ -271,7 +295,8 @@ const styles = StyleSheet.create({
     padding: 15,
     backgroundColor: '#FFF',
     borderRadius: 10,
-    marginBottom: 10,
+    marginTop: 5,
+    marginBottom: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -334,28 +359,13 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 15,
   },
-  modalInput: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    backgroundColor: '#F9F9F9',
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 15,
-    fontSize: 16,
-  },
-  modalText: {
-    fontSize: 18,
-    color: '#333',
-    marginBottom: 10,
-  },
   modalButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 15,
   },
   saveButton: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#1E2A5E',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
@@ -368,7 +378,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   closeButton: {
-    backgroundColor: '#FF3B30', // Red background color
+    backgroundColor: '#A02334', // Red background color
     padding: 15, // Reduced padding to match the save button
     borderRadius: 10,
     alignItems: 'center',
