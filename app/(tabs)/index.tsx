@@ -27,7 +27,8 @@ export default function HomeScreen() {
   const [input, setInput] = useState<string>("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSortModalVisible, setSortModalVisible] = useState<boolean>(false);
-  const [isSearchModalVisible, setSearchModalVisible] = useState<boolean>(false);
+  const [isSearchModalVisible, setSearchModalVisible] =
+    useState<boolean>(false);
   const [searchKeyword, setSearchKeyword] = useState<string>("");
   const [filteredTodos, setFilteredTodos] = useState<Todo[]>([]);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
@@ -165,7 +166,7 @@ export default function HomeScreen() {
     if (keyword.length === 0) {
       setFilteredTodos(todos);
     } else {
-      const matches = todos.filter(todo =>
+      const matches = todos.filter((todo) =>
         todo.text.toLowerCase().includes(keyword)
       );
       setFilteredTodos(matches);
@@ -173,7 +174,7 @@ export default function HomeScreen() {
         Alert.alert("No Match Found", "No tasks match your search.");
       }
     }
-    setSearchKeyword('');
+    setSearchKeyword("");
     setSearchModalVisible(false);
   };
 
@@ -227,10 +228,15 @@ export default function HomeScreen() {
       style={styles.container}
     >
       <View style={styles.header}>
-        <Image
-          source={require("../../assets/images/notes.png")} // Adjust the path if necessary
+        <TouchableOpacity
           style={styles.todoLogo}
-        />
+          onPress={() => setFilteredTodos([])} // Reset the filtered todos to show all
+        >
+          <Image
+            source={require("../../assets/images/notes.png")} // Adjust the path if necessary
+            style={styles.todoLogo}
+          />
+        </TouchableOpacity>
         <Text style={styles.title}> To Do List</Text>
         <TouchableOpacity
           style={styles.searchButton}
@@ -324,7 +330,8 @@ export default function HomeScreen() {
           </View>
         </Modal>
       )}
- {isSearchModalVisible && (
+
+      {isSearchModalVisible && (
         <Modal
           visible={isSearchModalVisible}
           animationType="slide"
@@ -500,7 +507,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: "auto",
   },
   deleteAllDoneButton: {
     padding: 10, // Same padding as the other buttons
@@ -508,7 +514,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  
+
   input: {
     borderWidth: 1,
     borderColor: "#E0E0E0",
@@ -720,7 +726,8 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
-    flex: 1,
+    // remove flex: 1
+    marginBottom: 10,
   },
   searchButtonText: {
     color: "#FFF",
