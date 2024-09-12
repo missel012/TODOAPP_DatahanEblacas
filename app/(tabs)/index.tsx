@@ -34,13 +34,19 @@ export default function HomeScreen() {
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
-
+  
+  React.useEffect(() => {
+    if (!searchKeyword.trim()) {
+      setFilteredTodos(todos);
+    }
+  }, [todos]);
+  
   const addTodo = () => {
     if (input.trim().length === 0) {
       Alert.alert("Input Error", "Please enter a to-do item");
       return;
     }
-
+  
     if (editingId) {
       setTodos(
         todos.map((todo) =>
@@ -54,11 +60,19 @@ export default function HomeScreen() {
         text: input,
         done: false,
       };
-      setTodos([...todos, newTodo]);
+      setTodos((prevTodos) => [...prevTodos, newTodo]);
     }
+  
+    // Reapply search filter or reset filteredTodos
+    if (searchKeyword.trim()) {
+      handleSearch();  // Reapply the search filter
+    } else {
+      setFilteredTodos([...todos, { id: Date.now().toString(), text: input, done: false }]);  // Reset filteredTodos
+    }
+  
     setInput("");
   };
-
+  
   const deleteTodo = (id: string) => {
     setTodos(todos.filter((todo) => todo.id !== id));
   };
@@ -173,7 +187,7 @@ export default function HomeScreen() {
         Alert.alert("No Match Found", "No tasks match your search.");
       }
     }
-    setSearchKeyword('');
+ 
     setSearchModalVisible(false);
   };
 
