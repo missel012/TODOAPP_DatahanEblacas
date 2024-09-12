@@ -177,6 +177,27 @@ export default function HomeScreen() {
     setSearchModalVisible(false);
   };
 
+  const deleteAllDone = () => {
+    Alert.alert(
+      "Confirm Deletion",
+      "Are you sure you want to delete all done tasks?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: () => {
+            setTodos(todos.filter((todo) => !todo.done));
+          },
+          style: "destructive",
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   const renderItem = ({ item }: { item: Todo }) => (
     <View style={styles.todoItem}>
       <View style={styles.todoTextContainer}>
@@ -252,10 +273,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.deleteAllDoneButton}
-          onPress={() => {
-            // Function to delete all done todos
-            setTodos(todos.filter((todo) => !todo.done));
-          }}
+          onPress={deleteAllDone}
         >
           <Image
             source={require("../../assets/images/deleteAllDone.png")} // Adjust the path if necessary
@@ -566,6 +584,7 @@ const styles = StyleSheet.create({
     height: 24,
     tintColor: "#007BFF",
   },
+  
   deleteButton: {
     width: 24,
     height: 24,
