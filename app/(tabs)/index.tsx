@@ -35,13 +35,19 @@ export default function HomeScreen() {
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
-
+  
+  React.useEffect(() => {
+    if (!searchKeyword.trim()) {
+      setFilteredTodos(todos);
+    }
+  }, [todos]);
+  
   const addTodo = () => {
     if (input.trim().length === 0) {
       Alert.alert("Input Error", "Please enter a to-do item");
       return;
     }
-
+  
     if (editingId) {
       setTodos(
         todos.map((todo) =>
@@ -55,11 +61,19 @@ export default function HomeScreen() {
         text: input,
         done: false,
       };
-      setTodos([...todos, newTodo]);
+      setTodos((prevTodos) => [...prevTodos, newTodo]);
     }
+  
+    // Reapply search filter or reset filteredTodos
+    if (searchKeyword.trim()) {
+      handleSearch();  // Reapply the search filter
+    } else {
+      setFilteredTodos([...todos, { id: Date.now().toString(), text: input, done: false }]);  // Reset filteredTodos
+    }
+  
     setInput("");
   };
-
+  
   const deleteTodo = (id: string) => {
     setTodos(todos.filter((todo) => todo.id !== id));
   };
@@ -178,6 +192,27 @@ export default function HomeScreen() {
     setSearchModalVisible(false);
   };
 
+  const deleteAllDone = () => {
+    Alert.alert(
+      "Confirm Deletion",
+      "Are you sure you want to delete all done tasks?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: () => {
+            setTodos(todos.filter((todo) => !todo.done));
+          },
+          style: "destructive",
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   const renderItem = ({ item }: { item: Todo }) => (
     <View style={styles.todoItem}>
       <View style={styles.todoTextContainer}>
@@ -258,10 +293,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.deleteAllDoneButton}
-          onPress={() => {
-            // Function to delete all done todos
-            setTodos(todos.filter((todo) => !todo.done));
-          }}
+          onPress={deleteAllDone}
         >
           <Image
             source={require("../../assets/images/deleteAllDone.png")} // Adjust the path if necessary
@@ -572,6 +604,7 @@ const styles = StyleSheet.create({
     height: 24,
     tintColor: "#007BFF",
   },
+  
   deleteButton: {
     width: 24,
     height: 24,
