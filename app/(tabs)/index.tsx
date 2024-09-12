@@ -27,6 +27,9 @@ export default function HomeScreen() {
   const [input, setInput] = useState<string>("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSortModalVisible, setSortModalVisible] = useState<boolean>(false);
+  const [isSearchModalVisible, setSearchModalVisible] = useState<boolean>(false);
+  const [searchKeyword, setSearchKeyword] = useState<string>("");
+  const [filteredTodos, setFilteredTodos] = useState<Todo[]>([]);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
@@ -157,6 +160,23 @@ export default function HomeScreen() {
     setSortModalVisible(false);
   };
 
+  const handleSearch = () => {
+    const keyword = searchKeyword.trim().toLowerCase();
+    if (keyword.length === 0) {
+      setFilteredTodos(todos);
+    } else {
+      const matches = todos.filter(todo =>
+        todo.text.toLowerCase().includes(keyword)
+      );
+      setFilteredTodos(matches);
+      if (matches.length === 0) {
+        Alert.alert("No Match Found", "No tasks match your search.");
+      }
+    }
+    setSearchKeyword('');
+    setSearchModalVisible(false);
+  };
+
   const renderItem = ({ item }: { item: Todo }) => (
     <View style={styles.todoItem}>
       <View style={styles.todoTextContainer}>
@@ -169,15 +189,13 @@ export default function HomeScreen() {
 
       <View style={styles.buttonsContainer}>
         {item.done ? (
-          // When task is done, "done" button will act like the delete button
           <TouchableOpacity onPress={() => deleteTodo(item.id)}>
             <Image
-              source={require("../../assets/images/done.png")} // Adjust the path if necessary
+              source={require("../../assets/images/done.png")}
               style={styles.doneButton}
             />
           </TouchableOpacity>
         ) : (
-          // Show view, edit, and delete buttons if the task is not done
           <>
             <TouchableOpacity onPress={() => openModal(item.id)}>
               <Image
@@ -210,10 +228,19 @@ export default function HomeScreen() {
     >
       <View style={styles.header}>
         <Image
-          source={require("../../assets/images/bars.png")} // Adjust the path if necessary
-          style={styles.taskLogo}
+          source={require("../../assets/images/notes.png")} // Adjust the path if necessary
+          style={styles.todoLogo}
         />
         <Text style={styles.title}> To Do List</Text>
+        <TouchableOpacity
+          style={styles.searchButton}
+          onPress={() => setSearchModalVisible(true)}
+        >
+          <Image
+            source={require("../../assets/images/search.png")} // Adjust the path if necessary
+            style={styles.taskLogo}
+          />
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.sortButton}
           onPress={() => setSortModalVisible(true)}
@@ -250,7 +277,7 @@ export default function HomeScreen() {
       </TouchableOpacity>
 
       <FlatList
-        data={todos}
+        data={filteredTodos.length ? filteredTodos : todos}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
       />
@@ -297,7 +324,37 @@ export default function HomeScreen() {
           </View>
         </Modal>
       )}
-
+ {isSearchModalVisible && (
+        <Modal
+          visible={isSearchModalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setSearchModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search..."
+                value={searchKeyword}
+                onChangeText={setSearchKeyword}
+              />
+              <TouchableOpacity
+                style={styles.searchClickButton}
+                onPress={handleSearch}
+              >
+                <Text style={styles.searchButtonText}>Search</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.sortModalCloseButton}
+                onPress={() => setSearchModalVisible(false)}
+              >
+                <Text style={styles.searchButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
       {selectedTodo && (
         <Modal
           visible={isModalVisible}
@@ -417,6 +474,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  todoLogo: {
+    width: 35,
+    height: 35,
+  },
   taskLogo: {
     width: 24,
     height: 24,
@@ -427,6 +488,27 @@ const styles = StyleSheet.create({
     color: "#333",
     marginLeft: 10,
   },
+  searchButton: {
+    padding: 10, // Match the padding with deleteAllDoneButton
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: "auto", // Keep the button aligned to the right
+  },
+  sortButton: {
+    padding: 10, // Increase the padding to match searchButton and deleteAllDoneButton
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: "auto",
+  },
+  deleteAllDoneButton: {
+    padding: 10, // Same padding as the other buttons
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  
   input: {
     borderWidth: 1,
     borderColor: "#E0E0E0",
@@ -577,13 +659,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 15,
   },
-  sortButton: {
-    padding: 15,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: "auto", // Push the sort button to the right
-  },
+
   sortOptionButton: {
     backgroundColor: "#f0f0f0",
     padding: 15,
@@ -607,10 +683,54 @@ const styles = StyleSheet.create({
     fontSize: 14, // Smaller font size for the sort modal close button
     fontWeight: "bold",
   },
-  deleteAllDoneButton: {
+
+  searchModalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  searchModalContent: {
+    width: "90%",
+    padding: 20,
+    backgroundColor: "#FFF",
+    borderRadius: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    backgroundColor: "#FFF",
+    padding: 15,
+    borderRadius: 10,
+    fontSize: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+    marginBottom: 15,
+  },
+  searchClickButton: {
+    backgroundColor: "#1E2A5E",
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
-    justifyContent: "center",
+    flex: 1,
+  },
+  searchButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  noMatchText: {
+    fontSize: 16,
+    color: "#A02334",
+    textAlign: "center",
+    marginTop: 15,
   },
 });
